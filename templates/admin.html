@@ -1,0 +1,367 @@
+{% extends "default.html" %}
+
+{% block content %}
+
+
+{% if request_dir %}
+<nav class="horizontal-menu compact">
+    <ul>
+        <li>
+            <a id="upload-file" href="javascript:void(0)"><i class="icon-upload-2"></i>上传文件</a>
+        </li>
+        <li>
+            <a id="new-folder" href="javascript:void(0)"><i class="icon-plus-2"></i>添加目录</a>
+        </li>
+        <li>
+            <a href="/admin?dir={{ request_dir }}"><i class="icon-loop"></i>刷新页面</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+
+{% if split_path %}
+<nav class="breadcrumbs">
+    <ul>
+        {% for sp in split_path %}
+            {% if split_path.last %}
+                <li class="active">
+                    <a href="/admin?dir={{ sp['path'].decode('utf-8') }}" >{{ sp['name'].decode('utf-8') }}</a>
+                </li>
+            {% else %}
+                <li>
+                    <a href="/admin?dir={{ sp['path'].decode('utf-8') }}">{{ sp['name'].decode('utf-8') }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>
+{% endif %}
+
+
+{#{{ split_path }}#}
+
+{% if error %}
+ <h2> {{ error.decode('utf-8')  }} </h2>
+ <h2> <a href="/admin">返回</a> </h2>
+{% endif %}
+
+{#显示文件列表#}
+{% if split_path %}
+<table id="table-list" class="table hovered">
+    <thead>
+    <tr>
+        <th class="text-left">名称</th>
+        <th class="text-left">最后修改时间</th>
+        <th class="text-left">文件大小</th>
+        <th class="text-left">操作</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+
+    {% for item in dir_list %}
+
+         {% if item.type=='F' %}
+              <tr id="file-list-{{ item.id }}">
+                 <td>
+                 <span class="icon-folder"></span>
+                 <a style="color: #000000;" href="/admin?dir={{ item.path.decode('utf-8') }}">
+                    {{ item.name.decode('utf-8') }}
+                 </a>
+                 </td>
+                 <td>{{ item.time }}</td>
+                 <td>{{ item.size }}</td>
+                 <td>
+                     <a style="color: #000000;" href="/admin?dir={{ item.path.decode('utf-8') }}">查看</a>
+                     <a style="color: #000000;" onclick="delete_file('{{ item.id }}')" href="javascript:void(0)">删除</a>
+                 </td>
+               </tr>
+              {% else %}
+              <tr id="file-list-{{ item.id }}">
+                  <td>
+                   <span class="icon-file"></span>
+                   {{ item.name.decode('utf-8') }}
+                  </td>
+                  <td>{{ item.time }}</td>
+                  <td>{{ item.size }}</td>
+                  <td>
+                      <a style="color: #000000;" href="/show?path={{ item.path.decode('utf-8') }}" target="_blank">查看</a>
+                      <a style="color: #000000;" onclick="delete_file('{{ item.id }}')" href="javascript:void(0)">删除</a>
+                  </td>
+              </tr>
+             {% endif %}
+
+    {% endfor %}
+
+    </tbody>
+</table>
+{% endif %}
+
+{% if request_dir %}
+{#新建目录#}
+
+{#<div id="new-folder-dialog" style="display: none">#}
+{#    <div style="padding: 40px 10px 10px;">#}
+{#            (不要包含特殊字符，例如路径分割符“/”)#}
+{#            <div class="input-control text">#}
+{#                <input class="new-folder-dialog-input" type="text" name="folder-name"/>#}
+{#            </div>#}
+{##}
+{#            <button class="new-folder-dialog-submit button primary">OK</button>&nbsp;#}
+{#            <button onclick="$.Dialog.close()"  class="button">Cancel</button>#}
+{#    </div>#}
+{#</div>#}
+
+{#上传文件#}
+
+{#<div id="upload-file-dialog" style="display: none">#}
+{##}
+{#    <div style="padding: 40px 10px 10px;">#}
+{#        <div class="input-control text">#}
+{#            <input class="upload-file-dialog-input" type="text" name="login" value="{{ request_dir }}"/>#}
+{#        </div>#}
+{#        <button id="upload-file-dialog-submit" class=" button primary" >OK</button>&nbsp;#}
+{#        <button onclick="$.Dialog.close()"  class="button">Cancel</button>#}
+{##}
+{#        <div id="filelist">Your browser doesn't have Flash, Silverlight or HTML5 support.</div>#}
+{#        <br />#}
+{##}
+{#        <div id="container">#}
+{#            <a id="pickfiles" href="javascript:;">[Select files]</a>#}
+{#            <a id="uploadfiles" href="javascript:;">[Upload files]</a>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{#</div>#}
+{#  脚本  #}
+<script>
+//初始化
+var LIST_COUNT = {{ dir_list | length }}
+var LIST_INFO = {
+    {% for item in dir_list %}
+    "{{ item.id }}":"{{ item.path }}",
+    {% endfor %}
+}
+$(document).ready(function(){
+
+    //新建目录
+    $("#new-folder").on('click', function(){
+        {#//$("#new-folder-dialog-input").val("{{ request_dir }}"); //不起作用#}
+        var html = "<div id=\"new-folder-dialog\" style=\"\"> \
+                        <div style=\"padding: 40px 10px 10px;\"> \
+                        (不要包含特殊字符，例如路径分割符“/”)\
+                        <div class=\"input-control text\">\
+                            <input id=\"new-folder-dialog-input\" type=\"text\" name=\"folder-name\"/> \
+                        </div>\
+                        <button id=\"new-folder-dialog-submit\" class=\"button primary\">OK</button>&nbsp; \
+                        <button onclick=\"$.Dialog.close()\"  class=\"button\">Cancel</button> \
+                        </div> \
+                    </div>";
+
+        $.Dialog({
+            overlay: true,
+            shadow: true,
+            flat: true,
+            icon: '',
+            title: '新建目录',
+            content: html, //$("#new-folder-dialog").html(),
+            onShow: function(_dialog) {
+                //alert(html);
+                $("button#new-folder-dialog-submit").click( function(){
+                    var new_folder_name = $("#new-folder-dialog-input")[0].value;
+                    if(new_folder_name.indexOf("/") >= 0 ) {
+                        $.Notify({
+                            caption: "系统信息",
+                            content: "目录名称包含特殊字符，请修改",
+                            timeout: 5000 // 5 seconds
+                        });
+                        return;
+                    }
+                    $.Dialog.close();
+
+                    $.post("/mkdir", { current_dir:"{{ request_dir }}", dir_name: new_folder_name},
+                       function(data){
+                         if (data.error == true) {
+                             $.Notify({
+                                caption: "系统信息",
+                                content: "创建失败:"+data.info,
+                                timeout: 5000 // 5 seconds
+                             });
+                         }
+                         //创建成功
+                         if (data.error == false) {
+                             //alert(data.path +" "+data.name+" "+data.size + " " +data.time);
+                             $.Notify({
+                                caption: "系统信息",
+                                content: data.info,
+                                timeout: 5000 // 5 seconds
+                             });
+                             var html = "<tr id=\"file-list-"+LIST_COUNT+"\">";
+                             html = html+"<td><span class=\"icon-folder\"></span>"+data.name+"</td>";
+                             html = html+"<td>"+data.time+"</td>";
+                             html = html+"<td>"+data.size+"</td>";
+                             html = html + "<td>";
+                             html = html + "<a style=\"color: #000000;\" href=\"/show?path=" + data.path + "\">查看</a>&nbsp;";
+                             html = html + "<a style=\"color: #000000;\" onclick=\"delete_file('"+LIST_COUNT+"')\" href=\"javascript:void(0)\">删除</a>";
+                             html = html +   "</td></tr>";
+                             $("table#table-list tbody").append(html);
+                             LIST_INFO[""+LIST_COUNT] = data.path;
+                             LIST_COUNT ++;
+
+                         }
+                       }, "json")
+                       .error(function() {
+                           $.Notify({
+                                caption: "系统信息",
+                                content: "系统错误，请稍后再试",
+                                timeout: 5000 // 5 seconds
+                             });
+                        });
+                });
+            }
+        });
+    });
+    //上传文件
+    $("#upload-file").on('click', function(){
+        var html = "" +
+               "<div id=\"upload-file-dialog\"> \
+                    <div style=\"padding: 40px 10px 10px;\">\
+                        <div id=\"filelist\" style=\"height:200px; overflow:auto\">Your browser doesn't have Flash, Silverlight or HTML5 support.</div><br />\
+                        <div id=\"container\">\
+                            <a id=\"pickfiles\" href=\"javascript:;\" class=\" button primary\" >选择文件</a>&nbsp;\
+                            <a id=\"uploadfiles\" href=\"javascript:;\" class=\" button primary\"> 上传 </a>&nbsp;&nbsp;&nbsp;\
+                            <button onclick=\"$.Dialog.close()\"  class=\"button\">取消</button>\
+                        </div>\
+                        <pre id=\"console\"></pre>\
+                    </div>\
+               </div>";
+        $.Dialog({
+            overlay: true,
+            shadow: true,
+            flat: true,
+            icon: '',
+            title: '上传文件',
+            height:'auto',
+            content: html,
+            onShow: function(_dialog) {
+                //alert(html);
+                //上传
+                var uploader = new plupload.Uploader({
+                    runtimes : 'html5,flash,silverlight,html4',
+                    browse_button : 'pickfiles', // element id
+                    container: document.getElementById('container'), // ... or DOM Element itself
+                    url : '/upload?dir={{ request_dir }}',
+                    flash_swf_url : '/static/plupload/Moxie.swf',
+                    silverlight_xap_url : '/static/plupload/Moxie.xap',
+
+                    filters : {
+                        max_file_size : '3mb'
+                    },
+
+                    init: {
+                        PostInit: function() {
+                            document.getElementById('filelist').innerHTML = '';
+
+                            document.getElementById('uploadfiles').onclick = function() {
+                                uploader.start();
+                                return false;
+                            };
+                        },
+
+                        FilesAdded: function(up, files) {
+                            plupload.each(files, function(file) {
+                                document.getElementById('filelist').innerHTML += '<div id="' + file.id + '">' + file.name + ' (' + plupload.formatSize(file.size) + ') <b></b></div>';
+                            });
+                        },
+
+                        UploadProgress: function(up, file) {
+                            document.getElementById(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+                        },
+
+                        FileUploaded: function(up, file, object) {
+                            // Called when file has finished uploading
+                            var json_info;
+                            try {
+                                json_info = eval(object.response);
+                            } catch(err) {
+                                json_info = eval('(' + object.response + ')');
+                            }
+
+                             if (json_info.error == true) {
+                                 $.Notify({
+                                    caption: "系统信息",
+                                    content: "创建失败:"+json_info.info,
+                                    timeout: 5000 // 5 seconds
+                                 });
+                             }
+                             //创建成功
+                             if (json_info.error == false) {
+
+                                 $.Notify({
+                                    caption: "系统信息",
+                                    content: json_info.info,
+                                    timeout: 5000 // 5 seconds
+                                 });
+                                 var html = "<tr id=\"file-list-"+LIST_COUNT+"\">";
+                                 html = html+"<td><span class=\"icon-file\"></span>"+json_info.name+"</td>";
+                                 html = html+"<td>"+json_info.time+"</td>";
+                                 html = html+"<td>"+json_info.size+"</td>";
+                                 html = html + "<td>";
+                                 html = html + "<a style=\"color: #000000;\" href=\"/show?path=" + json_info.path + "\" target=\"_blank\">查看</a>&nbsp;";
+                                 html = html + "<a style=\"color: #000000;\" onclick=\"delete_file('"+LIST_COUNT+"')\" href=\"javascript:void(0)\">删除</a>";
+                                 html = html +   "</td></tr>";
+                                 $("table#table-list tbody").append(html);
+                                 LIST_INFO[""+LIST_COUNT] = json_info.path;
+                                 LIST_COUNT ++;
+                             }
+
+                        },
+
+                        Error: function(up, err) {
+                            document.getElementById('console').innerHTML += "\nError #" + err.code + ": " + err.message;
+                        }
+                    }
+                });
+
+                uploader.init();
+                {#上传 end#}
+            }
+        });
+    });
+
+});
+//删除文件
+function delete_file(file_id) {
+    if (confirm('确定删除 ' + LIST_INFO[file_id] + '?')  == false) {
+        return;
+    }
+    $.post("/delete", { path: LIST_INFO[file_id]},
+       function(data){
+         if (data.error == true) {
+             $.Notify({
+                caption: "系统信息",
+                content: "删除失败:"+data.info,
+                timeout: 5000 // 5 seconds
+             });
+         }
+         if (data.error == false) {
+             $("tr#file-list-"+file_id).hide(); //删除成功后这样做
+             $.Notify({
+                caption: "系统信息",
+                content: data.info+"删除成功",
+                timeout: 5000 // 5 seconds
+             });
+         }
+       }, "json")
+       .error(function() {
+           $.Notify({
+                caption: "系统信息",
+                content: "系统错误，请稍后再试",
+                timeout: 5000 // 5 seconds
+             });
+        });
+}
+</script>
+{% endif %}
+{% endblock %}

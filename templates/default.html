@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>upyun管理平台</title>
+    <link rel="stylesheet" href="/static/metro/css/metro-bootstrap.css">
+    <link rel="stylesheet" href="/static/metro/css/iconFont.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/metro/js/jquery/jquery.min.js"></script>
+    <script src="/static/metro/js/jquery/jquery.widget.min.js"></script>
+    <script src="/static/metro/js/metro.min.js"></script>
+    <script src="/static/plupload/plupload.full.min.js"></script>
+    <script src="/static/plupload/jquery.ui.plupload/jquery.ui.plupload.min.js"></script>
+
+    <!--[if IE]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+</head>
+<body class="metro">
+
+<div class="navigation-bar dark">
+    <nav class="navigation-bar-content">
+
+        <item class="element place-left">
+            <a href="/" style="color: white;">UPYUN管理平台</a>
+        </item>
+
+        {% if username %}
+
+        <a class="element place-right" href="/logout">注销<i class="icon-switch"></i></a>
+        <span class="element-divider place-right"></span>
+        <a class="element place-right">
+           {{ username }}&nbsp;@&nbsp;{{ bucketname }}
+        </a>
+        {% endif %}
+    </nav>
+</div>
+
+<div class="container">
+    <div class="grid fluid">
+        <div class="row">
+            <div class="span2">
+
+
+            </div>
+            <div class="span8">
+                {% block content %}{% endblock %}
+            </div>
+            <div class="span2"></div>
+        </div>
+    </div>
+</div>
+
+{% block error %}{% endblock %}
+
+</body>
+</html>

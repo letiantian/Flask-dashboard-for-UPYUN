@@ -1,0 +1,47 @@
+{% extends "default.html" %}
+
+{% block content %}
+    <div class="grid ">
+        <div class="row">
+            <div class="span2"> </div>
+            <div class="span8">
+                <form action="/" method="post">
+                    <fieldset>
+                        <legend>登录upyun管理平台</legend>
+                        <label>用户名</label>
+                        <div data-role="input-control" class="input-control text">
+                            <input type="text" placeholder="type user name" name="username">
+                            <button tabindex="-1" class="btn-clear" type="button"></button>
+                        </div>
+                        <label>Bucket名称</label>
+                        <div data-role="input-control" class="input-control text">
+                            <input type="text" placeholder="type bucket name" name="bucket">
+                            <button tabindex="-1" class="btn-clear" type="button"></button>
+                        </div>
+                        <label>密码</label>
+                        <div data-role="input-control" class="input-control password">
+                            <input type="password" autofocus="" placeholder="type password" name="password">
+                            <button tabindex="-1" class="btn-reveal" type="button"></button>
+                        </div>
+                        <input type="submit" value="登录"/>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="span2"> </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block error %}
+    {% if login_error %}
+        <script>
+        $.Notify({
+        caption: "错误：",
+        content: "您尚未登录，或者输入信息错误",
+        timeout: 10000 // 10 seconds
+        });
+        </script>
+    {% endif %}
+{% endblock %}
