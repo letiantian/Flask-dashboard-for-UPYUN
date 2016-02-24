@@ -8,20 +8,15 @@ pip install flask
 
 ##运行
 ```
-python index.py
+python app.py
 ```
 在浏览器中输入`http://127.0.0.1:5000`，回车进入。  
 
-若需要自定义监听端口，请进入index.py，找到：
+若需要自定义监听端口，请进入app.py，修改以下代码：
 ```python
 if __name__ == '__main__':
-    ## 调试模式
-    app.run(debug=True)
-
-    ##使用80端口，并允许其他主机使用
-    #app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 ```
-根据需要修改即可。
 
 
 ##浏览器测试

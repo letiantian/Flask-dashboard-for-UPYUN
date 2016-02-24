@@ -1,14 +1,12 @@
-#!/usr/bin/env python
 #-*- encoding:utf-8 -*-
 
 __author__ = 'letian'
-
 
 from flask import Flask, request, session, redirect, url_for, render_template, escape, Response
 
 import upyun
 import upyun2
-import tool
+import util
 import sys
 import json
 
@@ -26,7 +24,7 @@ def index():
         bucketname = request.form['bucket'].strip()
         username = request.form['username'].strip()
         password = request.form['password'].strip()
-        if tool.valid_login(bucketname, username, password):
+        if util.valid_login(bucketname, username, password):
             session['username'] = username
             session['bucket'] = bucketname
             session['password'] = password
@@ -53,7 +51,7 @@ def admin():
     #若已经登录
     print '用户已经登录', session
     request_dir = request.args.get('dir', '')  #url中请求的参数
-    request_dir = tool.beautify_path(request_dir.strip())
+    request_dir = util.beautify_path(request_dir.strip())
     print '请求查看的目录：',request_dir
     bucket = upyun2.UpYun2(session['bucket'], session['username'],
                            session['password'], timeout=10, endpoint=upyun.ED_AUTO)
@@ -63,8 +61,8 @@ def admin():
             print '显示根目录内容'
         request_dir = '/'
         dir_list = bucket.getlist(request_dir)
-        dir_list=tool.process_dir_list(request_dir, dir_list)
-        split_path = tool.split_path(request_dir)
+        dir_list=util.process_dir_list(request_dir, dir_list)
+        split_path = util.split_path(request_dir)
         return render_template('admin.html', username=escape(session['username']),
                                bucketname=escape(session['bucket']), dir_list=dir_list,
                                split_path=split_path, request_dir=escape(request_dir))
@@ -73,8 +71,8 @@ def admin():
         if request_dir[-1] != '/':
             request_dir = request_dir + '/'
         dir_list = bucket.getlist(request_dir)
-        dir_list=tool.process_dir_list(request_dir, dir_list)
-        split_path = tool.split_path(request_dir)
+        dir_list=util.process_dir_list(request_dir, dir_list)
+        split_path = util.split_path(request_dir)
         return render_template('admin.html', username=escape(session['username']),
                                bucketname=escape(session['bucket']), dir_list=dir_list,
                                split_path=split_path, request_dir=escape(request_dir))
@@ -100,7 +98,7 @@ def show():
             print '还没登录呢'
         return redirect(url_for('index'))
     request_path = request.args.get('path', '')  #url中请求的参数path, GET专用
-    request_path = tool.beautify_path(request_path.strip())
+    request_path = util.beautify_path(request_path.strip())
     bucket = upyun2.UpYun2(session['bucket'], session['username'],
                            session['password'], timeout=10, endpoint=upyun.ED_AUTO)
     if not bucket.exists(request_path):
@@ -136,7 +134,7 @@ def delete():
             print '还没登录呢'
         return redirect(url_for('index'))
     request_path = request.form['path'].strip()  #request.form -> POST专用
-    request_path = tool.beautify_path(request_path.strip())
+    request_path = util.beautify_path(request_path.strip())
     if app.debug:
         print '要删除的文件或者目录 ', request_path
     bucket = upyun2.UpYun2(session['bucket'], session['username'],
@@ -183,7 +181,7 @@ def mkdir():
     if '/' in dir_name:
         re_info = {'error':True, 'info':'目录名包含特殊字符，请重新填写'}
         return json.dumps(re_info)
-    combine_name = tool.beautify_path(current_dir+'/'+dir_name)
+    combine_name = util.beautify_path(current_dir+'/'+dir_name)
     if app.debug:
         print '要创建目录: ', combine_name
     if bucket.exists(combine_name):
@@ -191,7 +189,7 @@ def mkdir():
         return json.dumps(re_info)
     try:
         bucket.mkdir(combine_name)
-        re_info = tool.process_folder_info(bucket.getinfo(combine_name))
+        re_info = util.process_folder_info(bucket.getinfo(combine_name))
         re_info['path'] = combine_name
         re_info['name'] = dir_name
         re_info['error'] = False
@@ -212,11 +210,11 @@ def upload():
             print '还没登录呢'
         return redirect(url_for('index'))
     try:
-        current_dir = tool.beautify_path(request.args.get('dir', ''))
+        current_dir = util.beautify_path(request.args.get('dir', ''))
         filename = request.files['file'].filename
         file_content = request.files['file'].stream.read()
         file_size = len(file_content)  # Byte
-        yun_path = tool.beautify_path(current_dir + '/' + filename)
+        yun_path = util.beautify_path(current_dir + '/' + filename)
 
         if app.debug:
             print '上传的文件信息如下：'
@@ -232,7 +230,7 @@ def upload():
             return json.dumps(re_info)
         #上传到云
         bucket.put(yun_path, file_content)
-        re_info = tool.process_file_info( bucket.getinfo(yun_path) )
+        re_info = util.process_file_info( bucket.getinfo(yun_path) )
         re_info['path'] = yun_path
         re_info['name'] = filename
         re_info['error'] = False
@@ -243,8 +241,4 @@ def upload():
         return json.dumps(re_info)
 
 if __name__ == '__main__':
-    ## 调试模式
-    app.run(debug=True)
-
-    ## 使用80端口，并允许其他主机使用
-    # app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=5000, debug=True)
