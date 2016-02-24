@@ -38,22 +38,22 @@ if __name__ == '__main__':
 ![](./docs/login.png)
 
 ###成功登录后
-![image](./docs/after-login.png)
+![](./docs/after-login.png)
 
 ###进入其他目录
-![image](https://gitcafe.com/letianbiji/Flask-dashboard-for-UPYUN/raw/master/docs/%E8%BF%9B%E5%85%A5%E5%85%B6%E4%BB%96%E7%9B%AE%E5%BD%95.png)
+![](./docs/cd.png)
 
 ###查看文件内容
-![image](https://gitcafe.com/letianbiji/Flask-dashboard-for-UPYUN/raw/master/docs/%E6%9F%A5%E7%9C%8B%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9.png)
+![](./docs/show-text.png)
 
 ###查看图片
-![image](https://gitcafe.com/letianbiji/Flask-dashboard-for-UPYUN/raw/master/docs/查看图片.png)
+![](./docs/show-img.png)
 
 ###创建目录
-![image](https://gitcafe.com/letianbiji/Flask-dashboard-for-UPYUN/raw/master/docs/%E5%88%9B%E5%BB%BA%E7%9B%AE%E5%BD%95.png)
+![](./docs/mkdir.png)
 
 ###上传文件
-![image](https://gitcafe.com/letianbiji/Flask-dashboard-for-UPYUN/raw/master/docs/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6.png)
+![](./docs/upload.png)
 
 ##文件限制
 这个工具上传和查看文件的功能是先使上传或者下载到该工具中，然后与上传到又拍云或者显示给用户，所以不宜上传/下载大文件。当然本工具也对此做了限制（3mb）。
