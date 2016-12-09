@@ -112,6 +112,7 @@ def show():
         txt = ['txt', 'py', 'c', 'cpp', 'java', 'html', 'htm','xml']
         img = ['png', 'jpg', 'jpeg', 'gif']
         info = bucket.getinfo(request_path)
+        print info
         if int(info['file-size']) > max_size:
             return render_template('show.html', error_info="文件太大，不支持访问" )
         if request_path.split('.')[-1].lower() in txt:
@@ -119,7 +120,11 @@ def show():
             return render_template('show.html', content = escape(content) )
         if request_path.split('.')[-1].lower() in img:
             content = bucket.get(request_path)
-            return Response(content, mimetype='image/'+request_path.split('.')[-1])
+            UpyunUrl = "http://" + session['bucket'] + ".b0.upaiyun.com" + request_path
+            if app.debug:
+                print "is img, request_path is %s, UpyunUrl is %s" % (request_path, UpyunUrl)
+            return redirect(UpyunUrl)
+            # return Response(content, mimetype='image/'+request_path.split('.')[-1])
             # return content
         return render_template('show.html', error_info="文件格式不支持" )
 
@@ -241,4 +246,4 @@ def upload():
         return json.dumps(re_info)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
