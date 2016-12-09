@@ -8,7 +8,7 @@ pip install flask upyun(pip install -r requirements.txt)
 
 ##运行
 
-1. 测试环境
+1、 测试环境
 ```
 python app.py
 ```
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 ```
 
-2. 正式环境
+2、 正式环境
 
 以下用uwsgi为例，启动脚本start.sh，内容如下:
 ```bash
