@@ -3,9 +3,12 @@
 
 ##安装相关库
 ```
-pip install flask upyun(pip install -r requirements.txt)
+pip install Flask upyun
 ```
-
+或者：
+```
+pip install -r requirements.txt
+```
 ##运行
 
 1、 测试环境
